@@ -8,9 +8,11 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import ru.itlearnmishunin.MySecondSpringBootAppl.exception.UnsupportedCodeException;
 import ru.itlearnmishunin.MySecondSpringBootAppl.exception.ValidationFailedException;
 import ru.itlearnmishunin.MySecondSpringBootAppl.model.Request;
 import ru.itlearnmishunin.MySecondSpringBootAppl.model.Response;
+import ru.itlearnmishunin.MySecondSpringBootAppl.service.UnsupportedService;
 import ru.itlearnmishunin.MySecondSpringBootAppl.service.ValidationService;
 
 import java.text.SimpleDateFormat;
@@ -18,9 +20,12 @@ import java.text.SimpleDateFormat;
 @RestController
 public class MyController {
     private final ValidationService validationService;
+    private final UnsupportedService unsupportedService;
+
     @Autowired
-    public MyController(ValidationService validationService){
+    public MyController(ValidationService validationService, UnsupportedService unsupportedService){
         this.validationService = validationService;
+        this.unsupportedService = unsupportedService;
     }
     @PostMapping(value = "/feedback")
     public ResponseEntity<Response> feedback (@Valid @RequestBody Request request, BindingResult bindingResult) throws ValidationFailedException {
@@ -37,7 +42,19 @@ public class MyController {
 
         try {
             validationService.isValid(bindingResult);
-        } catch (ValidationFailedException e){
+            unsupportedService.isCode123(bindingResult);
+            System.out.print(request.getUid());
+            if ("123".equals(request.getUid())){
+                throw new UnsupportedCodeException("Ooops.. Code '123' is reserved");
+            }
+
+        } catch (UnsupportedCodeException e){
+            response.setCode("failed");
+            response.setErrorCode("UnsupportedCodeException");
+            response.setErrorMessage("Ошибка кодирования" + e.getMessage());
+            return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+        }
+        catch (ValidationFailedException e){
             response.setCode("failed");
             response.setErrorCode("ValidationException");
             response.setErrorMessage("Ошибка Валидации");
