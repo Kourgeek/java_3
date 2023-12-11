@@ -14,8 +14,10 @@ import lombok.NoArgsConstructor;
 public class Request {
         @NotBlank
         String uid;
+        @NotBlank
         String operationUid;
         String systemName;
+        @NotBlank
         String systemTime;
         String source;
         Integer communicationId;
