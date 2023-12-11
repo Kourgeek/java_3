@@ -7,4 +7,5 @@ import ru.itlearnmishunin.MySecondSpringBootAppl.exception.ValidationFailedExcep
 @Service
 public interface ValidationService {
     void isValid(BindingResult bindingResult) throws ValidationFailedException;
+
 }
